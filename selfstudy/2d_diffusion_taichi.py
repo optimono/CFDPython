@@ -1,19 +1,17 @@
-from matplotlib import pyplot, cm
 import numpy
+from matplotlib import pyplot, cm
 import taichi as ti
 
 ti.init(arch=ti.metal)
 
 ###variable declarations
-nx = 501
-ny = 501
-nt = 100
-c = 1
+nx = 401
+ny = 401
+nu = .05
 dx = 2 / (nx - 1)
 dy = 2 / (ny - 1)
-sigma = .2
-dt = sigma * dx
-
+sigma = .25
+dt = sigma * dx * dy / nu
 
 velocity = ti.field(dtype=ti.f32, shape=(ny, nx))
 velocity_old = ti.field(dtype=ti.f32, shape=(ny, nx))
@@ -46,9 +44,11 @@ def render(v: ti.template()):
 def update():
     for j in range(1, ny):
         for i in range(1, nx):
-            velocity[j, i] = (velocity_old[j, i] - (c * dt / dx * (velocity_old[j, i] - velocity_old[j, i - 1])) -
-                              (c * dt / dy * (velocity_old[j, i] - velocity_old[j - 1, i])))
-
+            velocity[j, i] = (velocity_old[j, i] +
+                              nu * dt / dx ** 2 *
+                              (velocity_old[j, i + 1] - 2 * velocity_old[j, i] + velocity_old[j, i - 1]) +
+                              nu * dt / dy ** 2 *
+                              (velocity_old[j + 1, i] - 2 * velocity_old[j, i] + velocity_old[j - 1, i]))
     for i in range(ny):
         velocity[i, 0] = 1
         velocity[i, nx - 1] = 1
