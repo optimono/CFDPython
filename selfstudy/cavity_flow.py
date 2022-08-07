@@ -3,7 +3,7 @@ from matplotlib import pyplot, cm
 
 nx = 41
 ny = 41
-nt = 500
+nt = 50
 nit = 50
 c = 1
 dx = 2 / (nx - 1)
@@ -88,10 +88,14 @@ def cavity_flow(nt, u, v, dt, dx, dy, p, rho, nu):
                                dt / dy ** 2 *
                                (vn[2:, 1:-1] - 2 * vn[1:-1, 1:-1] + vn[0:-2, 1:-1])))
 
-        u[0, :] = 0
+        # u[0, :] = 0
+        # u[-1, :] = 1  # set velocity on cavity lid equal to 1
+
+        u[0, :] = 1
+        u[-1, :] = 0  # set velocity on cavity lid equal to 1
+
         u[:, 0] = 0
         u[:, -1] = 0
-        u[-1, :] = 1  # set velocity on cavity lid equal to 1
         v[0, :] = 0
         v[-1, :] = 0
         v[:, 0] = 0
@@ -103,10 +107,10 @@ def cavity_flow(nt, u, v, dt, dx, dy, p, rho, nu):
 def plot_2d(u, v, p):
     fig = pyplot.figure(figsize=(11, 7), dpi=100)
     # plotting the pressure field as a contour
-    pyplot.contourf(X, Y, p, alpha=0.5, cmap=cm.viridis)
-    pyplot.colorbar()
+    # pyplot.contourf(X, Y, p, alpha=0.5, cmap=cm.viridis)
+    # pyplot.colorbar()
     # plotting the pressure field outlines
-    pyplot.contour(X, Y, p, cmap=cm.viridis)
+    # pyplot.contour(X, Y, p, cmap=cm.viridis)
     # plotting velocity field
     pyplot.quiver(X[::2, ::2], Y[::2, ::2], u[::2, ::2], v[::2, ::2])
     pyplot.xlabel('X')
@@ -114,6 +118,22 @@ def plot_2d(u, v, p):
     pyplot.show()
 
 
+def im_show_v(u, v):
+    m = numpy.sqrt(u ** 2 + v ** 2)
+    pyplot.imshow(m)
+    pyplot.colorbar()
+    pyplot.show()
+
+
+def im_show_p(p):
+    m = numpy.abs(p)
+    pyplot.imshow(m)
+    pyplot.colorbar()
+    pyplot.show()
+
+
 u, v, p = cavity_flow(nt, u, v, dt, dx, dy, p, rho, nu)
 
-plot_2d(u, v, p)
+# plot_2d(u, v, p)
+im_show_v(u, v)
+im_show_p(p)
